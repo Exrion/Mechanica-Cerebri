@@ -37,11 +37,7 @@ async def on_ready():
 def main():
     from cogs.MainBot import MainBot
 
-    for file in os.listdir("./cogs"): # lists all the cog files inside the cog folder.
-        if file.endswith(".py"): # It gets all the cogs that ends with a ".py".
-            name = file[:-3] # It gets the name of the file removing the ".py"
-            bot.load_extension(f"cogs.{name}") # This loads the cog.
-
+    bot.add_cog(MainBot(bot))
     bot.run(DISCORDBOT_TOKEN)
 
 asyncio.run(main())
