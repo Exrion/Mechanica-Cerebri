@@ -1,0 +1,8 @@
+# ENV 
+.env
+
+# pycache
+__pycache__/
+
+# pip
+./env
