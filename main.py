@@ -304,7 +304,7 @@ async def displayQueue(ctx):
     format = '\n'.join(f"`{(upcoming.index(_)) + 1}.` [{_['title']}]({_['webpage_url']}) | ` {duration} Requested by: {_['requester']}`\n" for _ in upcoming)
     format = f"\n__Now Playing__:\n[{voice_channel.source.title}]({voice_channel.source.web_url}) | ` {duration} Requested by: {voice_channel.source.requester}`\n\n__Up Next:__\n" + format + f"\n**{len(upcoming)} songs in queue**"
     embed = discord.Embed(title=f"Queue for {ctx.guild.name}", description=format, color=discord.Color.blue())
-    embed.set_footer(text=f"{ctx.author.display_name}", icon_url=ctx.author.avatar_url)
+    embed.set_footer(text=f"{ctx.author.display_name}", icon_url=ctx.author.avatar)
     await ctx.send(embed=embed)
 
 # Now Playing
