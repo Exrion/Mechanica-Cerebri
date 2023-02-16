@@ -1,16 +1,13 @@
 import asyncio
-import logging
 import discord
 from discord.ext import commands
 import random
-import traceback
 import sys
 
 # Constants
 ERROR_MISSINGARG = 'Command is missing argument(s) - {argument}'
 
 # Configure sys.path
-sys.path.append(r'./Commands')
 sys.path.append(r'./Bot')
 print('System Paths Loaded:\n', sys.path)
 
@@ -122,14 +119,6 @@ async def joinVC(ctx):
         except asyncio.TimeoutError:
             raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
     await ctx.send(f'Joined `{channel}`')
-@joinVC.error
-async def joinVC_error(ctx, error):
-    if isinstance(error, commands.BadArgument):
-        embed = discord.Embed(title="", description="Error: Disallowed input type", color=discord.Color.red())
-        await ctx.send(embed=embed)
-    elif isinstance(error, commands.MissingRequiredArgument):
-        embed = discord.Embed(title="", description=ERROR_MISSINGARG.format(argument='Choices(string)'), color=discord.Color.red())
-        await ctx.send(embed=embed)
 
 # Leave Voice Channel
 @bot.command(name='leave')

@@ -9,3 +9,4 @@ env/
 
 # Python
 *.py[cod]
+test.py
