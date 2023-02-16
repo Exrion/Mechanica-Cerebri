@@ -1,6 +1,9 @@
+import asyncio
+import logging
 import discord
 from discord.ext import commands
 import random
+import traceback
 import sys
 
 # Constants
@@ -30,7 +33,8 @@ async def on_ready():
 @bot.command(name='ping')
 async def ping(ctx):
     """Ping Pong!"""
-    await ctx.send('Pong!')
+    embed = discord.Embed(title="", description='Pong!', color=discord.Color.green())
+    await ctx.send(embed=embed)
 
 
 # Utility Commands
@@ -38,13 +42,40 @@ async def ping(ctx):
 @bot.command(name='joined')
 async def joined(ctx, member: discord.Member):
     """Says when a member joined."""
-    await ctx.send(f'{member.name} joined {discord.utils.format_dt(member.joined_at)}')
+    embed = discord.Embed(title="", description=f'{member.name} joined {discord.utils.format_dt(member.joined_at)}', color=discord.Color.green())
+    await ctx.send(embed=embed)
+    
 @joined.error
 async def joined_error(ctx, error):
     if isinstance(error, commands.BadArgument):
-        await ctx.send('Guild Member not found!')
+        embed = discord.Embed(title="", description="Error: Guild Member not found!", color=discord.Color.red())
+        await ctx.send(embed=embed)
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(ERROR_MISSINGARG.format(argument='Guid Member'))
+        embed = discord.Embed(title="", description=ERROR_MISSINGARG.format(argument='Guid Member'), color=discord.Color.red())
+        await ctx.send(embed=embed)
+
+# Coin Flip
+@bot.command(name='coinflip')
+async def coin_flip(ctx):
+    """Heads of Tails Coin Flip"""
+    flip = random.randint(0, 1)
+    embed = discord.Embed(title="", description=('Heads' if flip == 0 else 'Tails'), color=discord.Color.green())
+    await ctx.send(embed=embed)
+
+# Choose
+@bot.command(name='choose')
+async def choose(ctx, *choices: str):
+    """Chooses between multiple choices."""
+    embed = discord.Embed(title="", description=random.choice(choices), color=discord.Color.green())
+    await ctx.send(embed=embed)
+@choose.error
+async def choose_error(ctx, error):
+    if isinstance(error, commands.BadArgument):
+        embed = discord.Embed(title="", description="Error: Disallowed input type", color=discord.Color.red())
+        await ctx.send(embed=embed)
+    elif isinstance(error, commands.MissingRequiredArgument):
+        embed = discord.Embed(title="", description=ERROR_MISSINGARG.format(argument='Choices(string)'), color=discord.Color.red())
+        await ctx.send(embed=embed)
 
 # Subcommand Checker
 @bot.group()
@@ -62,23 +93,56 @@ async def _bot(ctx):
 
 
 # Main Commands
-# Coin Flip
-@bot.command(name='coinflip')
-async def coin_flip(ctx):
-    """Heads of Tails Coin Flip"""
-    flip = random.randint(0, 1)
-    await ctx.send('Heads' if flip == 0 else 'Tails')
+# Join Voice Channel
+@bot.command(name='join')
+async def joinVC(ctx):
+    """Joins a voice channel"""
+    channel = None
 
-@bot.command(name='choose')
-async def choose(ctx, *choices: str):
-    """Chooses between multiple choices."""
-    await ctx.send(random.choice(choices))
-@choose.error
-async def choose_error(ctx, error):
+    if not channel:
+        try:
+            channel = ctx.author.voice.channel
+        except AttributeError:
+            embed = discord.Embed(title="", description="Error: User must be in a voice channel", color=discord.Color.red())
+            await ctx.send(embed=embed)
+            raise InvalidVoiceChannel('No channel to join. Please either specify a valid channel or join one.')
+
+    voice_channel = ctx.voice_client
+
+    if voice_channel:
+        if voice_channel.channel.id == channel.id:
+            return
+        try:
+            await voice_channel.move_to(channel)
+        except asyncio.TimeoutError:
+            raise VoiceConnectionError(f'Moving to channel: <{channel}> timed out.')
+    else:
+        try:
+            await channel.connect(self_deaf=True)
+        except asyncio.TimeoutError:
+            raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
+    await ctx.send(f'Joined `{channel}`')
+@joinVC.error
+async def joinVC_error(ctx, error):
     if isinstance(error, commands.BadArgument):
-        await ctx.send('Error: Disallowed input type')
+        embed = discord.Embed(title="", description="Error: Disallowed input type", color=discord.Color.red())
+        await ctx.send(embed=embed)
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(ERROR_MISSINGARG.format(argument='Choices(string)'))
+        embed = discord.Embed(title="", description=ERROR_MISSINGARG.format(argument='Choices(string)'), color=discord.Color.red())
+        await ctx.send(embed=embed)
+
+# Leave Voice Channel
+@bot.command(name='leave')
+async def leaveVC(ctx):
+    """Leaves a voice channel"""
+    voice_channel = ctx.voice_client
+
+    if not voice_channel or not voice_channel.is_connected():
+        embed = discord.Embed(title="", description="Error: Currently not connected to a voice channel", color=discord.Color.red())
+        await ctx.send(embed=embed)
+    else:
+        await voice_channel.disconnect()
+        await ctx.send('Disconnected from voice channel')
 
 # Run Bot
 bot.run(DISCORDBOT_TOKEN)
