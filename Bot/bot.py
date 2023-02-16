@@ -3,7 +3,7 @@ from discord.ext import commands
 
 # Constants
 description = '''Personal Discord Bot Testing'''
-command_prefix = '#'
+command_prefix = '~'
 
 def bot():
     intents = discord.Intents.default()

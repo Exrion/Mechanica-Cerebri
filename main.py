@@ -141,7 +141,8 @@ async def leaveVC(ctx):
         embed = discord.Embed(title="", description="Error: Currently not connected to a voice channel", color=discord.Color.red())
         await ctx.send(embed=embed)
     else:
-        cleanup(ctx)
+        # cleanup(ctx)
+        await ctx.guild.voice_client.disconnect()
         await ctx.send('Disconnected from voice channel')
 
 # Instantiate Player
