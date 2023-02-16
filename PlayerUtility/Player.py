@@ -5,7 +5,7 @@ from async_timeout import timeout
 from functools import partial
 from PlayerUtility.YTDLSource import YTDLSource
 
-class Player:
+class Player():
     """Instanstantiates an object of this class for each guild."""
 
     __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume')
@@ -34,7 +34,7 @@ class Player:
 
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
-                async with timeout(300):  # 5 minutes...
+                async with timeout(10):  # 5 minutes...
                     source = await self.queue.get()
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
@@ -61,6 +61,7 @@ class Player:
             source.cleanup()
             self.current = None
 
-    def destroy(self, guild):
+    async def destroy(self, guild):
         """Disconnect and cleanup the player."""
+        print(self._cog)
         return self.bot.loop.create_task(self._cog.cleanup(guild))
