@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 # Constants
-description = '''Personal Discord Bot Testing'''
+description = '''A simple music bot by Exrion#0854. Find my commands at https://github.com/Exrion/Mechanica-Cerebri'''
 command_prefix = '~'
 
 def bot():
